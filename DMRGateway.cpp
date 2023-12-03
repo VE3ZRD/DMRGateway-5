@@ -68,7 +68,7 @@ const unsigned int XLX_SLOT = 2U;
 const unsigned int XLX_TG   = 9U;
 
 const unsigned char COLOR_CODE = 3U;
-
+char cl = ('A') - 1U;
 unsigned int rdstId = 0;
 
 unsigned short selnet = 4;
@@ -80,6 +80,7 @@ static bool net3ok = false;
 static bool net4ok = false;
 static bool net5ok = false;
 static bool net6ok = false;
+static bool xlxmode = false;
 //static bool allnetok = false;
 
 static bool rf1ok = false;
@@ -107,8 +108,7 @@ static int  m_signal = 0;
 #if !defined(_WIN32) && !defined(_WIN64)
 static void sigHandler(int signum)
 {
-	m_killed = true;
-	m_signal = signum;
+	m_killed = true; m_signal = signum;
 }
 #endif
 
@@ -146,8 +146,7 @@ int main(int argc, char** argv)
 	int ret = 0;
 
 
-	do {
-		m_signal = 0;
+	do { m_signal = 0;
 	
 
 		CDMRGateway* host = new CDMRGateway(std::string(iniFile));
@@ -172,76 +171,17 @@ int main(int argc, char** argv)
 	return ret;
 }
 
-CDMRGateway::CDMRGateway(const std::string& confFile) :
-m_conf(confFile),
-m_status(NULL),
-m_repeater(NULL),
-m_config(NULL),
-m_configLen(0U),
-m_dmrNetwork1(NULL),
-m_dmr1Name(),
-m_dmrNetwork2(NULL),
-m_dmr2Name(),
-m_dmrNetwork3(NULL),
-m_dmr3Name(),
-m_dmrNetwork4(NULL),
-m_dmr4Name(),
-m_dmrNetwork5(NULL),
-m_dmr5Name(),
-m_dmrNetwork6(NULL),
-m_dmr6Name(),
-m_xlxReflectors(NULL),
-m_xlxNetwork(NULL),
-m_xlxId(0U),
-m_xlxNumber(0U),
-m_xlxReflector(4000U),
-m_xlxSlot(0U),
-m_xlxTG(0U),
-m_xlxBase(0U),
-m_xlxLocal(0U),
-m_xlxPort(62030U),
-m_xlxPassword("passw0rd"),
-m_xlxStartup(950U),
-m_xlxRoom(4000U),
-m_xlxRelink(1000U),
-m_xlxConnected(false),
-m_xlxDebug(false),
-m_xlxUserControl(true),
-m_xlxModule(),
-m_rptRewrite(NULL),
-m_xlxRewrite(NULL),
-m_xlxVoice(NULL),
-m_dmr1NetRewrites(),
-m_dmr1RFRewrites(),
-m_dmr1SrcRewrites(),
-m_dmr2NetRewrites(),
-m_dmr2RFRewrites(),
-m_dmr2SrcRewrites(),
-m_dmr3NetRewrites(),
-m_dmr3RFRewrites(),
-m_dmr3SrcRewrites(),
-m_dmr4NetRewrites(),
-m_dmr4RFRewrites(),
-m_dmr4SrcRewrites(),
-m_dmr5NetRewrites(),
-m_dmr5RFRewrites(),
-m_dmr5SrcRewrites(),
-m_dmr6NetRewrites(),
-m_dmr6RFRewrites(),
-m_dmr6SrcRewrites(),
-m_dmr1Passalls(),
-m_dmr2Passalls(),
-m_dmr3Passalls(),
-m_dmr4Passalls(),
-m_dmr5Passalls(),
-m_dmr6Passalls(),
-m_dynVoices(),
-m_dynRF(),
-m_socket(NULL),
-m_writer(NULL),
-m_callsign(),
-m_txFrequency(0U),
-m_rxFrequency(0U),
+CDMRGateway::CDMRGateway(const std::string& confFile) : m_conf(confFile), m_status(NULL), m_repeater(NULL), m_config(NULL), 
+m_configLen(0U), m_dmrNetwork1(NULL), m_dmr1Name(), m_dmrNetwork2(NULL), m_dmr2Name(), m_dmrNetwork3(NULL), m_dmr3Name(), 
+m_dmrNetwork4(NULL), m_dmr4Name(), m_dmrNetwork5(NULL), m_dmr5Name(), m_dmrNetwork6(NULL), m_dmr6Name(), m_xlxReflectors(NULL), 
+m_xlxNetwork(NULL), m_xlxId(0U), m_xlxNumber(0U), m_xlxReflector(4000U), m_xlxSlot(0U), m_xlxTG(0U), m_xlxBase(0U), m_xlxLocal(0U), 
+m_xlxPort(62030U), m_xlxPassword("passw0rd"), m_xlxStartup(950U), m_xlxRoom(4000U), m_xlxRelink(1000U), m_xlxConnected(false), 
+m_xlxDebug(false), m_xlxUserControl(true), m_xlxModule(), m_rptRewrite(NULL), m_xlxRewrite(NULL), m_xlxVoice(NULL), 
+m_dmr1NetRewrites(), m_dmr1RFRewrites(), m_dmr1SrcRewrites(), m_dmr2NetRewrites(), m_dmr2RFRewrites(), m_dmr2SrcRewrites(), 
+m_dmr3NetRewrites(), m_dmr3RFRewrites(), m_dmr3SrcRewrites(), m_dmr4NetRewrites(), m_dmr4RFRewrites(), m_dmr4SrcRewrites(), 
+m_dmr5NetRewrites(), m_dmr5RFRewrites(), m_dmr5SrcRewrites(), m_dmr6NetRewrites(), m_dmr6RFRewrites(), m_dmr6SrcRewrites(), 
+m_dmr1Passalls(), m_dmr2Passalls(), m_dmr3Passalls(), m_dmr4Passalls(), m_dmr5Passalls(), m_dmr6Passalls(), m_dynVoices(), m_dynRF(), 
+m_socket(NULL), m_writer(NULL), m_callsign(), m_txFrequency(0U), m_rxFrequency(0U),
 #if defined(USE_GPSD)
 m_gpsd(NULL),
 #endif
@@ -467,7 +407,7 @@ int CDMRGateway::run()
 //			}
 
 	    
-			// Double check it worked (AKA Paranoia) 
+			// Double check it worked (AKA Paranoia)
 //			if (setuid(0) != -1) {
 //				::fprintf(stderr, "It's possible to regain root - something is wrong!, exiting\n");
 //				return -1;
@@ -603,9 +543,8 @@ int CDMRGateway::run()
 			return 1;
 	}
 
-	if (m_conf.getVoiceEnabled()) {
-		std::string language = m_conf.getVoiceLanguage();
-		std::string directory = m_conf.getVoiceDirectory();
+	if (m_conf.getVoiceEnabled()) { std::string language = m_conf.getVoiceLanguage(); std::string directory = 
+		m_conf.getVoiceDirectory();
 
 		LogInfo("Voice Parameters");
 		LogInfo("    Enabled: yes");
@@ -641,9 +580,7 @@ int CDMRGateway::run()
 		}
 	}
 
-	if (m_network1Enabled && m_conf.getDMRNetwork1Enabled()) {
-		ret = createDMRNetwork1();
-		if (!ret)
+	if (m_network1Enabled && m_conf.getDMRNetwork1Enabled()) { ret = createDMRNetwork1(); if (!ret)
 			return 1;
 	}
 
@@ -677,9 +614,7 @@ int CDMRGateway::run()
 			return 1;
 	}
 
-	if (m_conf.getDynamicTGControlEnabled()) {
-		bool ret = createDynamicTGControl();
-		if (!ret)
+	if (m_conf.getDynamicTGControlEnabled()) { bool ret = createDynamicTGControl(); if (!ret)
 			return 1;
 	}
 
@@ -716,9 +651,7 @@ int CDMRGateway::run()
 	unsigned int dmr5DstId[3U];
 	dmr5SrcId[1U] = dmr5SrcId[2U] = dmr5DstId[1U] = dmr5DstId[2U] = 0U;
 
-	unsigned int dmr6SrcId[3U];
-	unsigned int dmr6DstId[3U];
-	dmr6SrcId[1U] = dmr6SrcId[2U] = dmr6DstId[1U] = dmr6DstId[2U] = 0U;
+	unsigned int dmr6SrcId[3U]; unsigned int dmr6DstId[3U]; dmr6SrcId[1U] = dmr6SrcId[2U] = dmr6DstId[1U] = dmr6DstId[2U] = 0U;
 
 	CStopWatch stopWatch;
 	stopWatch.start();
@@ -727,9 +660,11 @@ int CDMRGateway::run()
 
 
 	while (!m_killed) {
+		xlxmode = false;
 		if (m_networkXlxEnabled && (m_xlxNetwork != NULL)) {
 			bool connected = m_xlxNetwork->isConnected();
 			if (connected && !m_xlxConnected) {
+// Set / Change Module
 				if (m_xlxReflector >= 4001U && m_xlxReflector <= 4026U) {
 					writeXLXLink(m_xlxId, m_xlxReflector, m_xlxNetwork);
 					char c = ('A' + (m_xlxReflector % 100U)) - 1U;
@@ -749,7 +684,7 @@ int CDMRGateway::run()
 				}
 
 				m_xlxConnected = true;
-
+// Set / Change Reflector
 				if (m_xlxNumber == m_xlxStartup && m_xlxRoom == m_xlxReflector)
 					m_xlxRelink.stop();
 				else
@@ -790,8 +725,8 @@ int CDMRGateway::run()
 
 					m_xlxReflector = m_xlxRoom;
 					if (m_xlxVoice != NULL) {
-						if (m_xlxReflector < 4001U || m_xlxReflector > 4026U)
-							m_xlxVoice->linkedTo(m_xlxNumber, 0U);
+						if (m_xlxReflector < 4001U || m_xlxReflector > 4026U) m_xlxVoice->linkedTo(m_xlxNumber, 
+							0U);
 						else
 							m_xlxVoice->linkedTo(m_xlxNumber, m_xlxReflector);
 					}
@@ -814,17 +749,28 @@ int CDMRGateway::run()
 
 				m_xlxRewrite->process(data, false);
 				if (m_networkXlxEnabled) {
+
+		//Send rf data to network	
+
+					char c = ('A' + (m_xlxRoom % 100U)) - 1U;
+					if ( c != cl ) {
+						LogMessage("XLX, RF Data sent to  XLX%03u %c", m_xlxNumber, c);
+						cl = c;
+						xlxmode = true;
+					}
+					selnet=7;
+
 					m_xlxNetwork->write(data);
 				}
 				m_status[slotNo] = DMRGWS_XLXREFLECTOR;
 				timer[slotNo]->setTimeout(rfTimeout);
 				timer[slotNo]->start();
+
 			} else if ((dstId <= (m_xlxBase + 26U) || dstId == (m_xlxBase + 1000U)) && flco == FLCO_USER_USER && slotNo == m_xlxSlot && dstId >= m_xlxBase && m_xlxUserControl) {
 				dstId += 4000U;
 				dstId -= m_xlxBase;
 
-				if (dstId != m_xlxReflector) {
-					if (dstId == 4000U) {
+				if (dstId != m_xlxReflector) { if (dstId == 4000U) {
 						writeXLXLink(srcId, 4000U, m_xlxNetwork);
 						m_xlxReflector = 4000U;
 						char c = ('A' + (m_xlxRoom % 100U)) - 1U;
@@ -896,27 +842,14 @@ int CDMRGateway::run()
 					GWMode=0;
                                 }
 
-                                if ( dstId == 9007) {
-                                        ok2tx=false;
-				//	if ( GWMode != 7) 
-				//	{
-				//		GWMode=7;
-				//		SetDMR();
-				//		Reload();
-				//		LogInfo(" Loaded GWMode 7 Parameters");
-				//	}
-				}
-                                if ( dstId == 9008 ) {
-                                        ok2tx=false;
-				//	if ( GWMode != 8) 
-				//	{
-				//		GWMode=8;
-				//		SetDMR();
-				//		Reload();
-				//		LogInfo(" Loaded GWMode 8 Parameters");
-				//	}
+		
+				if ( dstId == 9007){
+					xlxmode = true;
+				}else{ 
+					xlxmode = false;
 				}
 				if ( dstId >= 9001 && dstId <= 9006){
+						xlxmode = false;
                                                 ClearNetworks();
                                                 ClearRFNets();
                                                 storedtg = dstId;
@@ -926,16 +859,10 @@ int CDMRGateway::run()
                                                 locknet = selnet;
                                                 if ( trace && ok2tx ) LogInfo("Network Locked = %d",selnet);
                                                 ok2tx=false;
-			//		 if ( GWMode != 1 ) {
-			//			GWMode = 1;
-//						SetDMR();
-					//	Reload();
-			//			LogInfo(" Loaded GWMode 1 Parameters");
-			//		}
                                 }
 				// 7 Digit Mode
 				if ( GWMode == 7 && dstId > 999999){
-                            
+                                     		xlxmode = false;
                                         	ClearNetworks();
                                         	ClearRFNets();
                                         	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
@@ -954,6 +881,7 @@ int CDMRGateway::run()
                                 }
 				// 8 Dgit Mode				
 				if ( dstId > 9999999 ){
+						xlxmode = false;
                                         	ClearNetworks();
                                         	ClearRFNets();
                                         	if ( trace ) LogInfo("Radio TG Keyed = %d",dstId);
@@ -965,15 +893,6 @@ int CDMRGateway::run()
                                         	locknet = selnet;
                                         	ok2tx=true;
                                                 if ( trace ) LogInfo("Network Locked = %d",selnet);
-			
-				//		if ( GWMode != 8 ) 
-				//		{
-				//			GWMode = 8;
-				//			Reload();
-				//			LogInfo(" Loaded GWMode 8 Parameters");
-//
-//							SetDMR();
-//						}
 
 						if (RawNet >= 1 && RawNet == selnet && dstId < 99999999)
 						{
@@ -984,9 +903,10 @@ int CDMRGateway::run()
 				}
 
 //				if (RawNet >= 1 && RawNet == selnet && dstId < 99999999)
-				if ( dstId <= 999999 && RawNet >=1 && RawNet <= 6 )
+				if ( dstId <= 999999 && dstId > 10 && RawNet >=1 && RawNet <= 6 )
 					{
-                                                ClearNetworks();
+        					xlxmode = false;
+	                                        ClearNetworks();
                                                 ClearRFNets();
 						GWMode=2;
 						selnet=RawNet;
@@ -997,9 +917,10 @@ int CDMRGateway::run()
 					}				
 
                                	if ( dstId >= 9000 && dstId <= 9009 ) ok2tx = false;
+       //                        	if ( dstId >= 6000 && dstId <= 6999 ) ok2tx = false;
 
 
-				if ( GWMode == 0 ) {
+				if ( GWMode == 0) {
                                         	if (m_dmrNetwork1 ) net1ok = true;
                                         	if (m_dmrNetwork2 ) net2ok = true;
                                         	if (m_dmrNetwork3 ) net3ok = true;
@@ -1012,7 +933,7 @@ int CDMRGateway::run()
                            	
 				switch( selnet ) {
                                                 case 0 :{ 
-                                                        
+                                                        //	xlxmode = true;
                                         			if (m_dmrNetwork1 ) rf1ok = true;
                                         			if (m_dmrNetwork2 ) rf2ok = true;
                                         			if (m_dmrNetwork3 ) rf3ok = true;
@@ -1025,12 +946,14 @@ int CDMRGateway::run()
                                                         {
                                                                  rf1ok=true;
                                                                 net1ok=true;
+ 								xlxmode = false;
                                                                 break;
                                                         }
 
                                                 case 2 : if ( m_dmrNetwork2 != NULL )
                                                         {
                                                                  rf2ok=true;
+ 								xlxmode = false;
                                                                 net2ok=true;
                                                                 break;
                                                         }
@@ -1038,33 +961,32 @@ int CDMRGateway::run()
                                                         {
                                                                  rf3ok=true;
                                                                 net3ok=true;
+ 								xlxmode = false;
                                                                 break;
                                                         }
                                                 case 4 : if ( m_dmrNetwork4 != NULL )
                                                                 {
                                                                  rf4ok=true;
                                                                 net4ok=true;
+ 								xlxmode = false;
                                                                 break;
-                                                        }
+                                                       }
                                                 case 5 : if ( m_dmrNetwork5 != NULL )
                                                         {
                                                                  rf5ok=true;
                                                                 net5ok=true;
-                                                                break;
+                            					xlxmode = false;
+                                    				break;
                                                         }
                                                 case 6 : if ( m_dmrNetwork6 != NULL )
                                                         {
                                                                  rf6ok=true;
                                                                 net6ok=true;
+								xlxmode = false;
                                                                 break;
                                                         }
-                                   //             case 7 : if ( m_dmrNetwork3 != NULL )
-                                   //                     {
-                                   //                              rf3ok=true;
-                                   //                             net3ok=true;
-                                   //     			locknet=3;  
-				   //                           break;
-                                   //                     }
+                                   		case 9 : { 	
+							}
 
                                         	}
 	if ( trace ) LogInfo("RF transmission: Net=%u, Slot=%u Src=%u Dst=%s%u", selnet, slotNo, srcId, flco == FLCO_GROUP ? "TG" : "", dstId);
@@ -1073,9 +995,10 @@ int CDMRGateway::run()
         if ( trace ) LogInfo("Network Locked = %d    OK to TX:%s", locknet, ok2tx ? "Yes" : "No" );
 	if ( trace ) LogInfo("RFRX Net %d Dest: %d From: %d  TS:%d", selnet, dstId, srcId, slotNo);
 	if ( trace ) LogInfo("Gateway Mode = %d", GWMode);
+	if ( trace ) LogInfo("Gateway Mode XLX Active = %d", xlxmode);
 	if ( trace && RawNet == selnet ) LogInfo("Raw Net Selected = Net%d ", selnet);
 
-
+        if ( trace ) LogInfo("Gateway Mode XLX %s", xlxmode?"true":"false");
 				if (m_network1Enabled && (m_dmrNetwork1 != NULL) && rf1ok && ok2tx) {
 					// Rewrite the slot and/or TG or neither
 					for (std::vector<CRewrite*>::iterator it = m_dmr1RFRewrites.begin(); it != m_dmr1RFRewrites.end(); ++it) {
@@ -1701,15 +1624,6 @@ rdstId=0;
 			if (ret)
 				m_repeater->writeBeacon();
 		}
-
-
-
-
-
-
-
-
-
 
 		processRadioPosition();
 
